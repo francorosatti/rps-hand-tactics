@@ -1,0 +1,8 @@
+export const ROUNDS_TO_WIN = 3;
+export const MAX_ROUNDS = 5;
+export const PICK_TIMER_SECONDS = 60;
+export const DRAFT_TIMER_SECONDS = 30;
+export const ROUND_END_PAUSE_MS = 3000;
+export const HAND_SIZE = 3;
+export const ROOM_CODE_LENGTH = 4;
+export const STALE_ROOM_TTL_MS = 30 * 60 * 1000; // 30 minutes
