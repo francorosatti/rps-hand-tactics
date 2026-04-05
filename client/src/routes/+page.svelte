@@ -217,6 +217,7 @@
         <button class:active={createMode === 'random'} onclick={() => createMode = 'random'}>{$t('home.randomCards')}</button>
         <button class:active={createMode === 'draft'} onclick={() => createMode = 'draft'}>{$t('home.draftCards')}</button>
       </div>
+      <p class="mode-desc">{createMode === 'random' ? $t('home.randomCardsDesc') : $t('home.draftCardsDesc')}</p>
       <button class="primary-btn" onclick={createRoom} disabled={!playerName.trim()}>{$t('home.createRoom')}</button>
     </div>
 
@@ -234,12 +235,21 @@
         <button
           class:active={quickModes.includes('random')}
           onclick={() => quickModes = quickModes.includes('random') ? quickModes.filter(m => m !== 'random') : [...quickModes, 'random']}
-        >{$t('home.random')}</button>
+        >{$t('home.randomCards')}</button>
         <button
           class:active={quickModes.includes('draft')}
           onclick={() => quickModes = quickModes.includes('draft') ? quickModes.filter(m => m !== 'draft') : [...quickModes, 'draft']}
-        >{$t('home.draft')}</button>
+        >{$t('home.draftCards')}</button>
       </div>
+      <p class="mode-desc">
+        {#if quickModes.length === 2}
+          {$t('home.bothModesDesc')}
+        {:else if quickModes.includes('random')}
+          {$t('home.randomCardsDesc')}
+        {:else if quickModes.includes('draft')}
+          {$t('home.draftCardsDesc')}
+        {/if}
+      </p>
       {#if $searching}
         <button class="primary-btn cancel" onclick={cancelQuickMatch}>{$t('home.cancelSearch')}</button>
         <p class="searching">{$t('home.searching')}</p>
@@ -501,6 +511,19 @@
     border-color: #7c3aed;
     background: #2d1b69;
     color: white;
+  }
+
+  .mode-desc {
+    font-size: 0.8rem;
+    color: #999;
+    margin: 0.25rem 0 0.5rem;
+    min-height: 1.2em;
+  }
+
+  .mode-desc-small {
+    font-size: 0.7rem;
+    color: #777;
+    margin: 0.25rem 0 0;
   }
 
   .primary-btn {

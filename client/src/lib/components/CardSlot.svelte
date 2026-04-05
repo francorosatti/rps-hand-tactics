@@ -31,7 +31,7 @@
 
   function cardIcon(card: Card): string {
     // Extract emoji prefix from name (e.g. "🏔️ Avalanche" -> "🏔️")
-    const match = card.name.match(/^(\p{Emoji_Presentation}[\uFE0F\u200D]*(?:\p{Emoji_Presentation}[\uFE0F\u200D]*)*)\s/u);
+    const match = card.name.match(/^(\p{Extended_Pictographic}[\uFE0F\u200D]*(?:\p{Extended_Pictographic}[\uFE0F\u200D]*)*)\s/u);
     return match ? match[1] : '';
   }
 </script>

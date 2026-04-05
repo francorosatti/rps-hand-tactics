@@ -81,7 +81,7 @@
   function cardDisplayName(card: { id: string; name: string } | null): string {
     if (!card) return $t('roundResult.noCard');
     // Extract emoji and use translated name
-    const match = card.name.match(/^(\p{Emoji_Presentation}[\uFE0F\u200D]*(?:\p{Emoji_Presentation}[\uFE0F\u200D]*)*)\s/u);
+    const match = card.name.match(/^(\p{Extended_Pictographic}[\uFE0F\u200D]*(?:\p{Extended_Pictographic}[\uFE0F\u200D]*)*)\s/u);
     const icon = match ? match[1] + ' ' : '';
     return icon + $t(`card.${card.id}.name`);
   }
