@@ -68,14 +68,14 @@ Cards have two IDs: `id` (type identifier like `str-rock`) and `uid` (unique ins
 
 | Card | Type | Power Effect |
 |------|------|-------------|
-| +Rock/+Paper/+Scissors | strengthen | +1 to your move's power |
-| -Rock/-Paper/-Scissors | weaken | -1 to opponent's move's power |
-| Shield | special | Converts a loss to a tie (applied after outcome) |
-| Tiebreaker | special | Converts a tie to a win (applied before Shield) |
-| Invert | field | Reverses all matchups for the round |
-| Nullify | nullify | Cancels opponent's card (both Nullify = both cancel) |
-| Rock/Paper/Scissors Field +1 | field_persistent | +1 power to that element for ALL players. Persists until replaced |
-| Rock/Paper/Scissors Field -1 | field_persistent | -1 power to that element for ALL players. Persists until replaced |
+| 🏔️ Avalanche / 🌪️ Tornado / ⚔️ Sharpener | strengthen | +1 to your Rock/Paper/Scissors power |
+| 🌧️ Rain / 🔥 Bonfire / 🧲 Rust | weaken | -1 to opponent's Rock/Paper/Scissors power |
+| 🛡️ Shield | special | Converts a loss to a tie (applied after outcome) |
+| 👑 Crown | special | Converts a tie to a win (applied before Shield) |
+| 🔄 Reversal | field | Reverses all matchups for the round |
+| 🚫 Silence | nullify | Cancels opponent's card (both Silence = both cancel) |
+| 🌋 Volcano / 🌊 Flood / ⚡ Storm | field_persistent | +1 power to Rock/Paper/Scissors for ALL players. Persists until replaced |
+| 💨 Erosion / ☀️ Drought / 🧊 Frost | field_persistent | -1 power to Rock/Paper/Scissors for ALL players. Persists until replaced |
 
 #### Resolution Algorithm (shared/src/resolution.ts)
 

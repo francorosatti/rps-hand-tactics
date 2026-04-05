@@ -53,14 +53,14 @@ Each player gets 3 cards per match (drafted or random).
 
 | Card | Effect |
 |------|--------|
-| +Rock / +Paper / +Scissors | Strengthens your move (wins mirrors, ties counters) |
-| -Rock / -Paper / -Scissors | Weakens opponent's move (loses to mirrors, ties what it beats) |
-| Shield | Converts a loss into a tie |
-| Tiebreaker | Converts a tie into a win |
-| Invert | Reverses all matchups for the round |
-| Nullify | Cancels the opponent's booster card |
-| Element Field +1 | Globally strengthens an element for all players (persists across rounds) |
-| Element Field -1 | Globally weakens an element for all players (persists across rounds) |
+| 🏔️ Avalanche / 🌪️ Tornado / ⚔️ Sharpener | Strengthens your move (wins mirrors, ties counters) |
+| 🌧️ Rain / 🔥 Bonfire / 🧲 Rust | Weakens opponent's move (loses to mirrors, ties what it beats) |
+| 🛡️ Shield | Converts a loss into a tie |
+| 👑 Crown | Converts a tie into a win |
+| 🔄 Reversal | Reverses all matchups for the round |
+| 🚫 Silence | Cancels the opponent's booster card |
+| 🌋 Volcano / 🌊 Flood / ⚡ Storm | Globally strengthens an element (persists across rounds) |
+| 💨 Erosion / ☀️ Drought / 🧊 Frost | Globally weakens an element (persists across rounds) |
 
 ## Project Structure
 

@@ -3,30 +3,54 @@ let uidCounter = 0;
 function nextUid() {
     return `card-${++uidCounter}-${Math.random().toString(36).slice(2, 8)}`;
 }
+// --- Thematic names and icons ---
+const STRENGTHEN_INFO = {
+    rock: { name: 'Avalanche', icon: '🏔️' },
+    paper: { name: 'Tornado', icon: '🌪️' },
+    scissors: { name: 'Sharpener', icon: '⚔️' },
+};
+const WEAKEN_INFO = {
+    rock: { name: 'Rain', icon: '🌧️' },
+    paper: { name: 'Bonfire', icon: '🔥' },
+    scissors: { name: 'Rust', icon: '🧲' },
+};
+const FIELD_PLUS_INFO = {
+    rock: { name: 'Volcano', icon: '🌋' },
+    paper: { name: 'Flood', icon: '🌊' },
+    scissors: { name: 'Storm', icon: '⚡' },
+};
+const FIELD_MINUS_INFO = {
+    rock: { name: 'Erosion', icon: '💨' },
+    paper: { name: 'Drought', icon: '☀️' },
+    scissors: { name: 'Frost', icon: '🧊' },
+};
+// --- Card factory functions ---
 function strengthenCard(move) {
+    const { name, icon } = STRENGTHEN_INFO[move];
     const beats = move === 'rock' ? 'paper' : move === 'paper' ? 'scissors' : 'rock';
     return {
         id: `str-${move}`,
         uid: nextUid(),
-        name: `+${move[0].toUpperCase() + move.slice(1)}`,
+        name: `${icon} ${name}`,
         type: 'strengthen',
         description: `Your ${move} beats opponent's ${move} and ties with ${beats}`,
         effect: { kind: 'strengthen', move },
     };
 }
 function weakenCard(move) {
+    const { name, icon } = WEAKEN_INFO[move];
     const normallyBeats = move === 'rock' ? 'scissors' : move === 'paper' ? 'rock' : 'paper';
     return {
         id: `wk-${move}`,
         uid: nextUid(),
-        name: `-${move[0].toUpperCase() + move.slice(1)}`,
+        name: `${icon} ${name}`,
         type: 'weaken',
         description: `Opponent's ${move} loses to your ${move} and ties with ${normallyBeats}`,
         effect: { kind: 'weaken', move },
     };
 }
 function fieldPersistentCard(move, modifier) {
-    const sign = modifier > 0 ? '+' : '';
+    const info = modifier > 0 ? FIELD_PLUS_INFO[move] : FIELD_MINUS_INFO[move];
     const losesTo = move === 'rock' ? 'paper' : move === 'paper' ? 'scissors' : 'rock';
     const beats = move === 'rock' ? 'scissors' : move === 'paper' ? 'rock' : 'paper';
     const desc = modifier > 0
@@ -35,7 +59,7 @@ function fieldPersistentCard(move, modifier) {
     return {
         id: `field-${move}-${modifier > 0 ? 'plus' : 'minus'}`,
         uid: nextUid(),
-        name: `${move[0].toUpperCase() + move.slice(1)} Field ${sign}${modifier}`,
+        name: `${info.icon} ${info.name}`,
         type: 'field_persistent',
         description: desc,
         effect: { kind: 'field_persistent', move, modifier },
@@ -50,16 +74,16 @@ export const CARD_CATALOG = [
     // Weaken (2 each = 6)
     ...moves.flatMap((m) => [weakenCard(m), weakenCard(m)]),
     // Shield (2)
-    specialCard('shield', 'Shield', 'special', 'Tie instead of lose', { kind: 'shield' }),
-    specialCard('shield', 'Shield', 'special', 'Tie instead of lose', { kind: 'shield' }),
+    specialCard('shield', '🛡️ Shield', 'special', 'Tie instead of lose', { kind: 'shield' }),
+    specialCard('shield', '🛡️ Shield', 'special', 'Tie instead of lose', { kind: 'shield' }),
     // Tiebreaker (2)
-    specialCard('tiebreaker', 'Tiebreaker', 'special', 'Win ties instead of drawing', { kind: 'tiebreaker' }),
-    specialCard('tiebreaker', 'Tiebreaker', 'special', 'Win ties instead of drawing', { kind: 'tiebreaker' }),
+    specialCard('tiebreaker', '👑 Crown', 'special', 'Win ties instead of drawing', { kind: 'tiebreaker' }),
+    specialCard('tiebreaker', '👑 Crown', 'special', 'Win ties instead of drawing', { kind: 'tiebreaker' }),
     // Invert (1)
-    specialCard('invert', 'Invert', 'field', 'Reverse all matchups for this round', { kind: 'invert' }),
+    specialCard('invert', '🔄 Reversal', 'field', 'Reverse all matchups for this round', { kind: 'invert' }),
     // Nullify (2)
-    specialCard('nullify', 'Nullify', 'nullify', "Cancel opponent's booster card", { kind: 'nullify' }),
-    specialCard('nullify', 'Nullify', 'nullify', "Cancel opponent's booster card", { kind: 'nullify' }),
+    specialCard('nullify', '🚫 Silence', 'nullify', "Cancel opponent's booster card", { kind: 'nullify' }),
+    specialCard('nullify', '🚫 Silence', 'nullify', "Cancel opponent's booster card", { kind: 'nullify' }),
     // Persistent field cards (6)
     ...moves.flatMap((m) => [fieldPersistentCard(m, 1), fieldPersistentCard(m, -1)]),
 ];
@@ -67,10 +91,10 @@ export const CARD_CATALOG = [
 export const DRAFT_CARD_LIST = [
     ...moves.map((m) => strengthenCard(m)),
     ...moves.map((m) => weakenCard(m)),
-    specialCard('shield', 'Shield', 'special', 'Tie instead of lose', { kind: 'shield' }),
-    specialCard('tiebreaker', 'Tiebreaker', 'special', 'Win ties instead of drawing', { kind: 'tiebreaker' }),
-    specialCard('invert', 'Invert', 'field', 'Reverse all matchups for this round', { kind: 'invert' }),
-    specialCard('nullify', 'Nullify', 'nullify', "Cancel opponent's booster card", { kind: 'nullify' }),
+    specialCard('shield', '🛡️ Shield', 'special', 'Tie instead of lose', { kind: 'shield' }),
+    specialCard('tiebreaker', '👑 Crown', 'special', 'Win ties instead of drawing', { kind: 'tiebreaker' }),
+    specialCard('invert', '🔄 Reversal', 'field', 'Reverse all matchups for this round', { kind: 'invert' }),
+    specialCard('nullify', '🚫 Silence', 'nullify', "Cancel opponent's booster card", { kind: 'nullify' }),
     ...moves.flatMap((m) => [fieldPersistentCard(m, 1), fieldPersistentCard(m, -1)]),
 ];
 export function drawRandomHand(count) {

@@ -14,9 +14,18 @@
     strengthen: '#22c55e',
     weaken: '#ef4444',
     special: '#3b82f6',
-    field: '#f59e0b',
+    field: '#3b82f6',
     field_persistent: '#a855f7',
-    nullify: '#6b7280',
+    nullify: '#3b82f6',
+  };
+
+  const typeLabels: Record<string, string> = {
+    strengthen: 'boost',
+    weaken: 'sabotage',
+    special: 'special',
+    field: 'field',
+    field_persistent: 'field',
+    nullify: 'counter',
   };
 </script>
 
@@ -28,7 +37,7 @@
   style="--type-color: {typeColors[card.type] || '#444'}"
 >
   <div class="card-header">{card.name}</div>
-  <div class="card-type">{card.type.replace('_', ' ')}</div>
+  <div class="card-type">{typeLabels[card.type] || card.type}</div>
   <div class="card-desc">{card.description}</div>
 </button>
 

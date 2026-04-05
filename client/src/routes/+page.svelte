@@ -242,16 +242,32 @@
     {:else}
       <h1>Draft Your Cards</h1>
       <p>Pick 3 cards ({draftSelection.length}/3)</p>
-      <div class="draft-grid">
-        {#each $draftCards as card (card.uid)}
-          <CardSlot
-            {card}
-            selected={draftSelection.some((s) => s.uid === card.uid)}
-            disabled={draftSelection.length >= 3 && !draftSelection.some((s) => s.uid === card.uid)}
-            onSelect={() => toggleDraftCard(card.uid, card.id)}
-          />
-        {/each}
-      </div>
+
+      {@const sections = [
+        { label: 'Boost', color: '#22c55e', cards: $draftCards.filter(c => c.type === 'strengthen') },
+        { label: 'Sabotage', color: '#ef4444', cards: $draftCards.filter(c => c.type === 'weaken') },
+        { label: 'Special', color: '#3b82f6', cards: $draftCards.filter(c => c.type === 'special' || c.type === 'nullify' || c.type === 'field') },
+        { label: 'Field', color: '#a855f7', cards: $draftCards.filter(c => c.type === 'field_persistent') },
+      ]}
+
+      {#each sections as section}
+        {#if section.cards.length > 0}
+          <div class="draft-section">
+            <h3 class="draft-section-label" style="color: {section.color}">{section.label}</h3>
+            <div class="draft-grid">
+              {#each section.cards as card (card.uid)}
+                <CardSlot
+                  {card}
+                  selected={draftSelection.some((s) => s.uid === card.uid)}
+                  disabled={draftSelection.length >= 3 && !draftSelection.some((s) => s.uid === card.uid)}
+                  onSelect={() => toggleDraftCard(card.uid, card.id)}
+                />
+              {/each}
+            </div>
+          </div>
+        {/if}
+      {/each}
+
       <button class="primary-btn" onclick={submitDraft} disabled={draftSelection.length !== 3}>
         Confirm Draft
       </button>
@@ -523,6 +539,22 @@
     align-items: center;
     gap: 1rem;
     padding-top: 1rem;
+  }
+
+  .draft-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .draft-section-label {
+    margin: 0;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid #333;
   }
 
   .draft-grid {
