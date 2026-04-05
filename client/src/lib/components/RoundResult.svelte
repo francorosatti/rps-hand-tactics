@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import type { RoundResult } from 'shared';
+  import type { RoundResult, DetailEntry } from 'shared';
+  import { t } from '$lib/i18n/index.js';
 
   interface Props {
     result: RoundResult;
@@ -15,6 +16,12 @@
     rock: '🪨',
     paper: '📄',
     scissors: '✂️',
+  };
+
+  const moveKeys: Record<string, string> = {
+    rock: 'move.rock',
+    paper: 'move.paper',
+    scissors: 'move.scissors',
   };
 
   // Staged reveal: clash → cards → details (one by one) → outcome
@@ -43,14 +50,41 @@
   });
 
   let outcomeText = $derived.by(() => {
-    if (result.winner === null) return 'TIE!';
-    return result.winner === playerIndex ? 'YOU WIN!' : 'YOU LOSE!';
+    if (result.winner === null) return $t('roundResult.tie');
+    return result.winner === playerIndex ? $t('roundResult.youWin') : $t('roundResult.youLose');
   });
 
   let outcomeClass = $derived.by(() => {
     if (result.winner === null) return 'tie';
     return result.winner === playerIndex ? 'win' : 'lose';
   });
+
+  function translateDetail(detail: DetailEntry): string {
+    const p = detail.params ?? {};
+    // Resolve translated card name and move name into params
+    const resolved: Record<string, string> = { ...p };
+    if (p.cardId) {
+      resolved.cardName = $t(`card.${p.cardId}.name`);
+    }
+    if (p.move) {
+      resolved.move = $t(`move.${p.move}`);
+    }
+    if (p.effect && (detail.key === 'detail.fieldActive')) {
+      resolved.effect = $t(`detail.fieldActive.${p.effect}`);
+    }
+    if (p.effect && (detail.key === 'detail.fieldEffect')) {
+      resolved.effect = $t(`detail.fieldEffect.${p.effect}`);
+    }
+    return $t(detail.key, resolved);
+  }
+
+  function cardDisplayName(card: { id: string; name: string } | null): string {
+    if (!card) return $t('roundResult.noCard');
+    // Extract emoji and use translated name
+    const match = card.name.match(/^(\p{Emoji_Presentation}[\uFE0F\u200D]*(?:\p{Emoji_Presentation}[\uFE0F\u200D]*)*)\s/u);
+    const icon = match ? match[1] + ' ' : '';
+    return icon + $t(`card.${card.id}.name`);
+  }
 </script>
 
 <div class="round-result">
@@ -59,13 +93,13 @@
     <div class="move-display slide-left">
       <span class="player-name">{p1Name}</span>
       <span class="move-emoji">{moveEmoji[result.moves[0]]}</span>
-      <span class="move-label">{result.moves[0]}</span>
+      <span class="move-label">{$t(moveKeys[result.moves[0]])}</span>
     </div>
-    <span class="vs-badge" class:visible={phase !== 'clash'}>VS</span>
+    <span class="vs-badge" class:visible={phase !== 'clash'}>{$t('roundResult.vs')}</span>
     <div class="move-display slide-right">
       <span class="player-name">{p2Name}</span>
       <span class="move-emoji">{moveEmoji[result.moves[1]]}</span>
-      <span class="move-label">{result.moves[1]}</span>
+      <span class="move-label">{$t(moveKeys[result.moves[1]])}</span>
     </div>
   </div>
 
@@ -74,16 +108,16 @@
     <div class="cards-row visible">
       <div class="card-badge-wrap">
         {#if result.cards[0]}
-          <span class="card-played pop">{result.cards[0].name}</span>
+          <span class="card-played pop">{cardDisplayName(result.cards[0])}</span>
         {:else}
-          <span class="card-played none">No card</span>
+          <span class="card-played none">{$t('roundResult.noCard')}</span>
         {/if}
       </div>
       <div class="card-badge-wrap">
         {#if result.cards[1]}
-          <span class="card-played pop">{result.cards[1].name}</span>
+          <span class="card-played pop">{cardDisplayName(result.cards[1])}</span>
         {:else}
-          <span class="card-played none">No card</span>
+          <span class="card-played none">{$t('roundResult.noCard')}</span>
         {/if}
       </div>
     </div>
@@ -93,7 +127,7 @@
   {#if visibleDetails > 0}
     <div class="details-list">
       {#each result.details.slice(0, visibleDetails) as detail, i (i)}
-        <p class="detail-line fade-up">{detail}</p>
+        <p class="detail-line fade-up">{translateDetail(detail)}</p>
       {/each}
     </div>
   {/if}

@@ -21,11 +21,13 @@
   import Timer from '$lib/components/Timer.svelte';
   import type { Move, Card } from 'shared';
   import { FIELD_PLUS_INFO, FIELD_MINUS_INFO } from 'shared';
+  import { t, locale } from '$lib/i18n/index.js';
 
   function activeFieldLabel(move: Move, modifier: number): string {
     const info = modifier > 0 ? FIELD_PLUS_INFO[move] : FIELD_MINUS_INFO[move];
-    const effect = modifier > 0 ? 'boosts' : 'weakens';
-    return `${info.icon} ${info.name} (${effect} ${move})`;
+    const cardId = `field-${move}-${modifier > 0 ? 'plus' : 'minus'}`;
+    const effect = modifier > 0 ? $t('game.boosts') : $t('game.weakens');
+    return `${info.icon} ${$t(`card.${cardId}.name`)} (${effect} ${$t(`move.${move}`)})`;
   }
 
   let playerName = $state('');
@@ -168,71 +170,75 @@
 
 {#if $currentScreen === 'home'}
   <div class="home">
-    <h1>RPS Hand Tactics</h1>
-    <p class="subtitle">Rock Paper Scissors with booster cards</p>
+    <div class="lang-toggle">
+      <button class="lang-btn" class:active={$locale === 'en'} onclick={() => $locale = 'en'}>EN</button>
+      <button class="lang-btn" class:active={$locale === 'es'} onclick={() => $locale = 'es'}>ES</button>
+    </div>
+    <h1>{$t('home.title')}</h1>
+    <p class="subtitle">{$t('home.subtitle')}</p>
 
     <div class="name-input">
-      <input type="text" bind:value={playerName} placeholder="Your name" maxlength="20" />
+      <input type="text" bind:value={playerName} placeholder={$t('home.yourName')} maxlength="20" />
     </div>
 
     <div class="section">
-      <h2>Create Room</h2>
+      <h2>{$t('home.createRoom')}</h2>
       <div class="mode-select">
-        <button class:active={createMode === 'random'} onclick={() => createMode = 'random'}>Random Cards</button>
-        <button class:active={createMode === 'draft'} onclick={() => createMode = 'draft'}>Draft Cards</button>
+        <button class:active={createMode === 'random'} onclick={() => createMode = 'random'}>{$t('home.randomCards')}</button>
+        <button class:active={createMode === 'draft'} onclick={() => createMode = 'draft'}>{$t('home.draftCards')}</button>
       </div>
-      <button class="primary-btn" onclick={createRoom} disabled={!playerName.trim()}>Create Room</button>
+      <button class="primary-btn" onclick={createRoom} disabled={!playerName.trim()}>{$t('home.createRoom')}</button>
     </div>
 
     <div class="section">
-      <h2>Join Room</h2>
+      <h2>{$t('home.joinRoom')}</h2>
       <div class="join-row">
-        <input type="text" bind:value={joinCode} placeholder="Room code" maxlength="4" class="code-input" />
-        <button class="primary-btn" onclick={joinRoom} disabled={!playerName.trim() || !joinCode.trim()}>Join</button>
+        <input type="text" bind:value={joinCode} placeholder={$t('home.roomCode')} maxlength="4" class="code-input" />
+        <button class="primary-btn" onclick={joinRoom} disabled={!playerName.trim() || !joinCode.trim()}>{$t('home.join')}</button>
       </div>
     </div>
 
     <div class="section">
-      <h2>Quick Match</h2>
+      <h2>{$t('home.quickMatch')}</h2>
       <div class="mode-select">
         <button
           class:active={quickModes.includes('random')}
           onclick={() => quickModes = quickModes.includes('random') ? quickModes.filter(m => m !== 'random') : [...quickModes, 'random']}
-        >Random</button>
+        >{$t('home.random')}</button>
         <button
           class:active={quickModes.includes('draft')}
           onclick={() => quickModes = quickModes.includes('draft') ? quickModes.filter(m => m !== 'draft') : [...quickModes, 'draft']}
-        >Draft</button>
+        >{$t('home.draft')}</button>
       </div>
       {#if $searching}
-        <button class="primary-btn cancel" onclick={cancelQuickMatch}>Cancel Search</button>
-        <p class="searching">Searching for opponent...</p>
+        <button class="primary-btn cancel" onclick={cancelQuickMatch}>{$t('home.cancelSearch')}</button>
+        <p class="searching">{$t('home.searching')}</p>
       {:else}
-        <button class="primary-btn" onclick={quickMatch} disabled={!playerName.trim() || quickModes.length === 0}>Find Match</button>
+        <button class="primary-btn" onclick={quickMatch} disabled={!playerName.trim() || quickModes.length === 0}>{$t('home.findMatch')}</button>
       {/if}
     </div>
   </div>
 
 {:else if $currentScreen === 'lobby'}
   <div class="lobby">
-    <h1>Waiting for Opponent</h1>
+    <h1>{$t('lobby.waiting')}</h1>
     {#if $gameState?.roomCode}
       <div class="room-code-display">
         <span class="code">{$gameState.roomCode}</span>
-        <button onclick={copyRoomCode} class="copy-btn">Copy</button>
+        <button onclick={copyRoomCode} class="copy-btn">{$t('lobby.copy')}</button>
       </div>
-      <p>Share this code with a friend</p>
+      <p>{$t('lobby.shareCode')}</p>
     {/if}
     <div class="spinner"></div>
-    <button class="secondary-btn" onclick={leaveGame}>Leave</button>
+    <button class="secondary-btn" onclick={leaveGame}>{$t('lobby.leave')}</button>
   </div>
 
 {:else if $currentScreen === 'drafting'}
   <div class="draft-screen">
     {#if draftSubmitted}
-      <h1>Draft Locked In!</h1>
+      <h1>{$t('draft.lockedIn')}</h1>
       <div class="draft-summary">
-        <p>Your picks:</p>
+        <p>{$t('draft.yourPicks')}</p>
         <div class="draft-picks">
           {#each draftSelection as sel (sel.uid)}
             {@const card = $draftCards.find((c) => c.uid === sel.uid)}
@@ -244,17 +250,17 @@
       </div>
       <div class="waiting-opponent">
         <div class="spinner"></div>
-        <p>Waiting for opponent to draft...</p>
+        <p>{$t('draft.waitingOpponent')}</p>
       </div>
     {:else}
-      <h1>Draft Your Cards</h1>
-      <p>Pick 3 cards ({draftSelection.length}/3)</p>
+      <h1>{$t('draft.title')}</h1>
+      <p>{$t('draft.pickCards')} ({draftSelection.length}/3)</p>
 
       {@const sections = [
-        { label: 'Boost', color: '#22c55e', cards: $draftCards.filter(c => c.type === 'strengthen') },
-        { label: 'Sabotage', color: '#ef4444', cards: $draftCards.filter(c => c.type === 'weaken') },
-        { label: 'Special', color: '#3b82f6', cards: $draftCards.filter(c => c.type === 'special' || c.type === 'nullify' || c.type === 'field') },
-        { label: 'Field', color: '#a855f7', cards: $draftCards.filter(c => c.type === 'field_persistent') },
+        { label: $t('draft.boost'), color: '#22c55e', cards: $draftCards.filter(c => c.type === 'strengthen') },
+        { label: $t('draft.sabotage'), color: '#ef4444', cards: $draftCards.filter(c => c.type === 'weaken') },
+        { label: $t('draft.special'), color: '#3b82f6', cards: $draftCards.filter(c => c.type === 'special' || c.type === 'nullify' || c.type === 'field') },
+        { label: $t('draft.field'), color: '#a855f7', cards: $draftCards.filter(c => c.type === 'field_persistent') },
       ]}
 
       {#each sections as section}
@@ -276,7 +282,7 @@
       {/each}
 
       <button class="primary-btn" onclick={submitDraft} disabled={draftSelection.length !== 3}>
-        Confirm Draft
+        {$t('draft.confirmDraft')}
       </button>
     {/if}
   </div>
@@ -284,7 +290,7 @@
 {:else if $currentScreen === 'game' && $gameState}
   <div class="game-screen">
     {#if $opponentDisconnected}
-      <div class="disconnect-banner">Opponent disconnected</div>
+      <div class="disconnect-banner">{$t('game.opponentDisconnected')}</div>
     {/if}
 
     <Scoreboard
@@ -298,7 +304,7 @@
 
     {#if $gameState.activeField}
       <div class="active-field">
-        Active Field: {activeFieldLabel($gameState.activeField.move, $gameState.activeField.modifier)}
+        {$t('game.activeField')} {activeFieldLabel($gameState.activeField.move, $gameState.activeField.modifier)}
       </div>
     {/if}
 
@@ -313,9 +319,9 @@
       <div class="picking-area">
         <div class="opponent-status">
           {#if $gameState.players[$gameState.playerIndex === 0 ? 1 : 0].lockedIn}
-            <span class="locked">Opponent locked in</span>
+            <span class="locked">{$t('game.opponentLocked')}</span>
           {:else}
-            <span class="waiting-opp">Opponent is choosing...</span>
+            <span class="waiting-opp">{$t('game.opponentChoosing')}</span>
           {/if}
         </div>
 
@@ -341,27 +347,27 @@
           onclick={lockIn}
           disabled={!selectedMove || lockedIn}
         >
-          {lockedIn ? 'Locked In!' : 'Lock In'}
+          {lockedIn ? $t('game.lockedIn') : $t('game.lockIn')}
         </button>
       </div>
     {/if}
 
-    <button class="secondary-btn leave-btn" onclick={leaveGame}>Leave Game</button>
+    <button class="secondary-btn leave-btn" onclick={leaveGame}>{$t('game.leaveGame')}</button>
   </div>
 
 {:else if $currentScreen === 'result'}
   <div class="result-screen">
     <h1>
       {#if $matchResult}
-        {$matchResult.winner === null ? 'Draw!' : $matchResult.winner === $gameState?.playerIndex ? 'Victory!' : 'Defeat!'}
+        {$matchResult.winner === null ? $t('result.draw') : $matchResult.winner === $gameState?.playerIndex ? $t('result.victory') : $t('result.defeat')}
       {/if}
     </h1>
     {#if $matchResult}
       <p class="final-score">{$matchResult.finalScore[0]} - {$matchResult.finalScore[1]}</p>
     {/if}
     <div class="result-actions">
-      <button class="primary-btn" onclick={rematch}>Rematch</button>
-      <button class="secondary-btn" onclick={leaveGame}>Leave</button>
+      <button class="primary-btn" onclick={rematch}>{$t('result.rematch')}</button>
+      <button class="secondary-btn" onclick={leaveGame}>{$t('result.leave')}</button>
     </div>
   </div>
 {/if}
@@ -422,7 +428,13 @@
     letter-spacing: 0.2em;
     text-align: center;
     font-weight: 700;
-    max-width: 140px;
+    min-width: 160px;
+  }
+
+  .code-input::placeholder {
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: 400;
   }
 
   .join-row {
@@ -489,6 +501,30 @@
 
   .secondary-btn:hover {
     border-color: #666;
+  }
+
+  .lang-toggle {
+    display: flex;
+    gap: 0.25rem;
+    align-self: flex-end;
+  }
+
+  .lang-btn {
+    padding: 0.3rem 0.6rem;
+    border: 1px solid #444;
+    border-radius: 6px;
+    background: transparent;
+    color: #888;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .lang-btn.active {
+    border-color: #7c3aed;
+    color: #7c3aed;
+    background: #2d1b69;
   }
 
   .searching {

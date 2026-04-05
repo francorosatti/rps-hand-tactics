@@ -45,13 +45,17 @@ export interface ActiveField {
     move: Move;
     modifier: 1 | -1;
 }
+export interface DetailEntry {
+    key: string;
+    params?: Record<string, string>;
+}
 export interface RoundResult {
     round: number;
     moves: [Move, Move];
     cards: [Card | null, Card | null];
     winner: 0 | 1 | null;
     scoreAwarded: [number, number];
-    details: string[];
+    details: DetailEntry[];
 }
 export interface GameState {
     roomCode: string;

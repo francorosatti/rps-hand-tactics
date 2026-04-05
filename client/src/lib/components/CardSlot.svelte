@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Card } from 'shared';
+  import { t } from '$lib/i18n/index.js';
 
   interface Props {
     card: Card;
@@ -19,14 +20,20 @@
     nullify: '#3b82f6',
   };
 
-  const typeLabels: Record<string, string> = {
-    strengthen: 'boost',
-    weaken: 'sabotage',
-    special: 'special',
-    field: 'field',
-    field_persistent: 'field',
-    nullify: 'counter',
+  const typeKeys: Record<string, string> = {
+    strengthen: 'cardType.boost',
+    weaken: 'cardType.sabotage',
+    special: 'cardType.special',
+    field: 'cardType.field',
+    field_persistent: 'cardType.field',
+    nullify: 'cardType.counter',
   };
+
+  function cardIcon(card: Card): string {
+    // Extract emoji prefix from name (e.g. "🏔️ Avalanche" -> "🏔️")
+    const match = card.name.match(/^(\p{Emoji_Presentation}[\uFE0F\u200D]*(?:\p{Emoji_Presentation}[\uFE0F\u200D]*)*)\s/u);
+    return match ? match[1] : '';
+  }
 </script>
 
 <button
@@ -36,9 +43,9 @@
   onclick={() => onSelect(card)}
   style="--type-color: {typeColors[card.type] || '#444'}"
 >
-  <div class="card-header">{card.name}</div>
-  <div class="card-type">{typeLabels[card.type] || card.type}</div>
-  <div class="card-desc">{card.description}</div>
+  <div class="card-header">{cardIcon(card)} {$t(`card.${card.id}.name`)}</div>
+  <div class="card-type">{$t(typeKeys[card.type] || card.type)}</div>
+  <div class="card-desc">{$t(`card.${card.id}.desc`)}</div>
 </button>
 
 <style>

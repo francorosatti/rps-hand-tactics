@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Move } from 'shared';
+  import { t } from '$lib/i18n/index.js';
 
   interface Props {
     selected: Move | null;
@@ -9,15 +10,15 @@
 
   let { selected, disabled, onSelect }: Props = $props();
 
-  const moves: { move: Move; emoji: string }[] = [
-    { move: 'rock', emoji: '🪨' },
-    { move: 'paper', emoji: '📄' },
-    { move: 'scissors', emoji: '✂️' },
+  const moves: { move: Move; emoji: string; key: string }[] = [
+    { move: 'rock', emoji: '🪨', key: 'move.rock' },
+    { move: 'paper', emoji: '📄', key: 'move.paper' },
+    { move: 'scissors', emoji: '✂️', key: 'move.scissors' },
   ];
 </script>
 
 <div class="hand-picker">
-  {#each moves as { move, emoji }}
+  {#each moves as { move, emoji, key }}
     <button
       class="move-btn"
       class:selected={selected === move}
@@ -25,7 +26,7 @@
       onclick={() => onSelect(move)}
     >
       <span class="emoji">{emoji}</span>
-      <span class="label">{move}</span>
+      <span class="label">{$t(key)}</span>
     </button>
   {/each}
 </div>

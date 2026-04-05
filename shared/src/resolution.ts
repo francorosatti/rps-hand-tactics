@@ -1,4 +1,4 @@
-import type { Move, Card, RoundResult, ActiveField, CardEffect } from './types.js';
+import type { Move, Card, RoundResult, ActiveField, CardEffect, DetailEntry } from './types.js';
 
 type Outcome = 'win' | 'lose' | 'tie';
 
@@ -47,22 +47,22 @@ export function resolveRound(input: ResolveInput): ResolveOutput {
   const n1 = input.p1.name;
   const n2 = input.p2.name;
   let activeField = input.activeField;
-  const details: string[] = [];
+  const details: DetailEntry[] = [];
 
   // --- Step 1: Nullify ---
   const p1Nullify = getEffect(p1Card)?.kind === 'nullify';
   const p2Nullify = getEffect(p2Card)?.kind === 'nullify';
 
   if (p1Nullify && p2Nullify) {
-    details.push('Both played 🚫 Silence — both cards cancelled!');
+    details.push({ key: 'detail.nullify.both' });
     p1Card = null;
     p2Card = null;
   } else if (p1Nullify) {
-    details.push(`${n1}'s 🚫 Silence cancelled ${n2}'s ${p2Card?.name ?? 'card'}!`);
+    details.push({ key: 'detail.nullify', params: { player: n1, opponent: n2, cardId: p2Card?.id ?? '', cardName: p2Card?.name ?? '' } });
     p2Card = null;
     p1Card = null;
   } else if (p2Nullify) {
-    details.push(`${n2}'s 🚫 Silence cancelled ${n1}'s ${p1Card?.name ?? 'card'}!`);
+    details.push({ key: 'detail.nullify', params: { player: n2, opponent: n1, cardId: p1Card?.id ?? '', cardName: p1Card?.name ?? '' } });
     p1Card = null;
     p2Card = null;
   }
@@ -73,11 +73,11 @@ export function resolveRound(input: ResolveInput): ResolveOutput {
   // --- Step 2: Update persistent field ---
   if (p1Effect?.kind === 'field_persistent') {
     activeField = { move: p1Effect.move, modifier: p1Effect.modifier };
-    details.push(`${p1Card!.name} is now active! All ${p1Effect.move} moves get ${p1Effect.modifier > 0 ? 'stronger' : 'weaker'}.`);
+    details.push({ key: 'detail.fieldActive', params: { cardId: p1Card!.id, move: p1Effect.move, effect: p1Effect.modifier > 0 ? 'stronger' : 'weaker' } });
   }
   if (p2Effect?.kind === 'field_persistent') {
     activeField = { move: p2Effect.move, modifier: p2Effect.modifier };
-    details.push(`${p2Card!.name} is now active! All ${p2Effect.move} moves get ${p2Effect.modifier > 0 ? 'stronger' : 'weaker'}.`);
+    details.push({ key: 'detail.fieldActive', params: { cardId: p2Card!.id, move: p2Effect.move, effect: p2Effect.modifier > 0 ? 'stronger' : 'weaker' } });
   }
 
   // --- Step 3: Invert check ---
@@ -86,9 +86,9 @@ export function resolveRound(input: ResolveInput): ResolveOutput {
   const useInvert = invert && !bothInvert;
 
   if (bothInvert) {
-    details.push('Both played 🔄 Reversal — they cancel out!');
+    details.push({ key: 'detail.invert.both' });
   } else if (useInvert) {
-    details.push('🔄 Reversal flips all matchups this round!');
+    details.push({ key: 'detail.invert' });
   }
 
   // --- Step 4: Calculate power modifiers for each player's move ---
@@ -101,9 +101,9 @@ export function resolveRound(input: ResolveInput): ResolveOutput {
     if (p2Move === activeField.move) p2Power += activeField.modifier;
     if (p1Move === activeField.move || p2Move === activeField.move) {
       const affected = [];
-      if (p1Move === activeField.move) affected.push(`${n1}'s ${p1Move}`);
-      if (p2Move === activeField.move) affected.push(`${n2}'s ${p2Move}`);
-      details.push(`Active field ${activeField.modifier > 0 ? 'boosts' : 'weakens'} ${affected.join(' and ')}.`);
+      if (p1Move === activeField.move) affected.push(n1);
+      if (p2Move === activeField.move) affected.push(n2);
+      details.push({ key: 'detail.fieldEffect', params: { effect: activeField.modifier > 0 ? 'boosts' : 'weakens', move: activeField.move, players: affected.join(', ') } });
     }
   }
 
@@ -111,17 +111,17 @@ export function resolveRound(input: ResolveInput): ResolveOutput {
   if (p1Effect?.kind === 'strengthen') {
     if (p1Effect.move === p1Move) {
       p1Power += 1;
-      details.push(`${p1Card!.name} powers up ${n1}'s ${p1Move}!`);
+      details.push({ key: 'detail.strengthen', params: { cardId: p1Card!.id, player: n1, move: p1Move } });
     } else {
-      details.push(`${p1Card!.name} had no effect — ${n1} didn't play ${p1Effect.move}.`);
+      details.push({ key: 'detail.noEffect', params: { cardId: p1Card!.id, player: n1, move: p1Effect.move } });
     }
   }
   if (p2Effect?.kind === 'strengthen') {
     if (p2Effect.move === p2Move) {
       p2Power += 1;
-      details.push(`${p2Card!.name} powers up ${n2}'s ${p2Move}!`);
+      details.push({ key: 'detail.strengthen', params: { cardId: p2Card!.id, player: n2, move: p2Move } });
     } else {
-      details.push(`${p2Card!.name} had no effect — ${n2} didn't play ${p2Effect.move}.`);
+      details.push({ key: 'detail.noEffect', params: { cardId: p2Card!.id, player: n2, move: p2Effect.move } });
     }
   }
 
@@ -129,17 +129,17 @@ export function resolveRound(input: ResolveInput): ResolveOutput {
   if (p1Effect?.kind === 'weaken') {
     if (p1Effect.move === p2Move) {
       p2Power -= 1;
-      details.push(`${p1Card!.name} weakens ${n2}'s ${p2Move}!`);
+      details.push({ key: 'detail.weaken', params: { cardId: p1Card!.id, player: n2, move: p2Move } });
     } else {
-      details.push(`${p1Card!.name} had no effect — ${n2} didn't play ${p1Effect.move}.`);
+      details.push({ key: 'detail.noEffect.weaken', params: { cardId: p1Card!.id, player: n2, move: p1Effect.move } });
     }
   }
   if (p2Effect?.kind === 'weaken') {
     if (p2Effect.move === p1Move) {
       p1Power -= 1;
-      details.push(`${p2Card!.name} weakens ${n1}'s ${p1Move}!`);
+      details.push({ key: 'detail.weaken', params: { cardId: p2Card!.id, player: n1, move: p1Move } });
     } else {
-      details.push(`${p2Card!.name} had no effect — ${n1} didn't play ${p2Effect.move}.`);
+      details.push({ key: 'detail.noEffect.weaken', params: { cardId: p2Card!.id, player: n1, move: p2Effect.move } });
     }
   }
 
@@ -152,23 +152,23 @@ export function resolveRound(input: ResolveInput): ResolveOutput {
     const p2Tie = p2Effect?.kind === 'tiebreaker';
 
     if (p1Tie && p2Tie) {
-      details.push('Both played 👑 Crown — they cancel out, still a tie!');
+      details.push({ key: 'detail.tiebreaker.both' });
     } else if (p1Tie) {
       outcome = 'win';
-      details.push(`${n1}'s 👑 Crown breaks the tie!`);
+      details.push({ key: 'detail.tiebreaker', params: { player: n1 } });
     } else if (p2Tie) {
       outcome = 'lose';
-      details.push(`${n2}'s 👑 Crown breaks the tie!`);
+      details.push({ key: 'detail.tiebreaker', params: { player: n2 } });
     }
   }
 
   // --- Step 7: Shield ---
   if (outcome === 'win' && p2Effect?.kind === 'shield') {
     outcome = 'tie';
-    details.push(`${n2}'s 🛡️ Shield blocks the hit — it's a tie!`);
+    details.push({ key: 'detail.shield', params: { player: n2 } });
   } else if (outcome === 'lose' && p1Effect?.kind === 'shield') {
     outcome = 'tie';
-    details.push(`${n1}'s 🛡️ Shield blocks the hit — it's a tie!`);
+    details.push({ key: 'detail.shield', params: { player: n1 } });
   }
 
   // --- Step 8: Determine winner and score ---

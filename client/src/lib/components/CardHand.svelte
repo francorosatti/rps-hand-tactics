@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Card } from 'shared';
+  import { t } from '$lib/i18n/index.js';
   import CardSlot from './CardSlot.svelte';
 
   interface Props {
@@ -21,7 +22,7 @@
 </script>
 
 <div class="card-hand">
-  <h3>Your Cards</h3>
+  <h3>{$t('hand.yourCards')}</h3>
   <div class="cards">
     {#each cards as card (card.uid)}
       <CardSlot
@@ -32,7 +33,7 @@
       />
     {/each}
     {#if cards.length === 0}
-      <p class="empty">No cards remaining</p>
+      <p class="empty">{$t('hand.noCards')}</p>
     {/if}
   </div>
 </div>

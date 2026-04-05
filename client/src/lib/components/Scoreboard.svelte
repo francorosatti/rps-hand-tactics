@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { t } from '$lib/i18n/index.js';
+
   interface Props {
     p1Name: string;
     p2Name: string;
@@ -13,15 +15,15 @@
 
 <div class="scoreboard">
   <div class="player" class:you={playerIndex === 0}>
-    <span class="name">{p1Name}{playerIndex === 0 ? ' (you)' : ''}</span>
+    <span class="name">{p1Name}{playerIndex === 0 ? ` ${$t('scoreboard.you')}` : ''}</span>
     <span class="score">{p1Score}</span>
   </div>
   <div class="round-info">
-    Round {round} / 5
+    {$t('scoreboard.round')} {round} / 5
   </div>
   <div class="player" class:you={playerIndex === 1}>
     <span class="score">{p2Score}</span>
-    <span class="name">{playerIndex === 1 ? '(you) ' : ''}{p2Name}</span>
+    <span class="name">{playerIndex === 1 ? `${$t('scoreboard.you')} ` : ''}{p2Name}</span>
   </div>
 </div>
 
