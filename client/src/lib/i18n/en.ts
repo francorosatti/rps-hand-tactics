@@ -50,6 +50,10 @@ export const en: Record<string, string> = {
   'result.defeat': 'Defeat!',
   'result.draw': 'Draw!',
   'result.rematch': 'Rematch',
+  'result.rematchWaiting': 'Waiting for opponent...',
+  'result.rematchRequested': 'Opponent wants a rematch!',
+  'result.acceptRematch': 'Accept',
+  'result.declineRematch': 'Decline',
   'result.leave': 'Leave',
 
   // Scoreboard

@@ -77,6 +77,7 @@ export interface GameState {
   roundResults: RoundResult[];
   activeField: ActiveField | null;
   turnTimer: number;
+  rematchRequested: [boolean, boolean];
 }
 
 // --- Client view (hides opponent's hand and submission) ---
@@ -112,6 +113,8 @@ export interface ServerToClientEvents {
   'opponent-locked': () => void;
   'round-result': (data: { result: RoundResult; activeField: ActiveField | null; scores: [number, number] }) => void;
   'match-result': (data: { winner: 0 | 1 | null; finalScore: [number, number] }) => void;
+  'rematch-requested': () => void;
+  'rematch-declined': () => void;
   'opponent-disconnected': () => void;
   'error': (data: { message: string }) => void;
 }
@@ -125,5 +128,6 @@ export interface ClientToServerEvents {
   'submit-move': (data: { move: Move; cardUid?: string }) => void;
   'lock-in': () => void;
   'rematch': () => void;
+  'decline-rematch': () => void;
   'leave-game': () => void;
 }

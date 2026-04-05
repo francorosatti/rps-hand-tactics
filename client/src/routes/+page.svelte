@@ -12,6 +12,7 @@
     opponentDisconnected,
     errorMessage,
     searching,
+    rematchState,
   } from '$lib/stores/game.js';
   import HandPicker from '$lib/components/HandPicker.svelte';
   import CardHand from '$lib/components/CardHand.svelte';
@@ -110,11 +111,18 @@
   function rematch() {
     const socket = getSocket();
     socket.emit('rematch');
+    $rematchState = 'sent';
     selectedMove = null;
     selectedCardId = null;
     lockedIn = false;
     draftSubmitted = false;
     draftSelection = [];
+  }
+
+  function declineRematch() {
+    const socket = getSocket();
+    socket.emit('decline-rematch');
+    $rematchState = 'none';
   }
 
   function leaveGame() {
@@ -123,6 +131,7 @@
     $currentScreen = 'home';
     $gameState = null;
     $matchResult = null;
+    $rematchState = 'none';
     selectedMove = null;
     selectedCardId = null;
     lockedIn = false;
@@ -366,7 +375,15 @@
       <p class="final-score">{$matchResult.finalScore[0]} - {$matchResult.finalScore[1]}</p>
     {/if}
     <div class="result-actions">
-      <button class="primary-btn" onclick={rematch}>{$t('result.rematch')}</button>
+      {#if $rematchState === 'sent'}
+        <p class="rematch-status">{$t('result.rematchWaiting')}</p>
+      {:else if $rematchState === 'received'}
+        <p class="rematch-status">{$t('result.rematchRequested')}</p>
+        <button class="primary-btn" onclick={rematch}>{$t('result.acceptRematch')}</button>
+        <button class="secondary-btn" onclick={declineRematch}>{$t('result.declineRematch')}</button>
+      {:else}
+        <button class="primary-btn" onclick={rematch}>{$t('result.rematch')}</button>
+      {/if}
       <button class="secondary-btn" onclick={leaveGame}>{$t('result.leave')}</button>
     </div>
   </div>
@@ -694,7 +711,17 @@
 
   .result-actions {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 1rem;
+  }
+
+  .rematch-status {
+    width: 100%;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.95rem;
+    margin: 0;
   }
 
   .error-toast {

@@ -45,6 +45,7 @@ export class RoomManager {
       roundResults: [],
       activeField: null,
       turnTimer: 0,
+      rematchRequested: [false, false],
     };
 
     this.rooms.set(code, state);

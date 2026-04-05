@@ -66,6 +66,7 @@ export interface GameState {
     roundResults: RoundResult[];
     activeField: ActiveField | null;
     turnTimer: number;
+    rematchRequested: [boolean, boolean];
 }
 export interface ClientGameState {
     roomCode: string;
@@ -116,6 +117,8 @@ export interface ServerToClientEvents {
         winner: 0 | 1 | null;
         finalScore: [number, number];
     }) => void;
+    'rematch-requested': () => void;
+    'rematch-declined': () => void;
     'opponent-disconnected': () => void;
     'error': (data: {
         message: string;
@@ -144,6 +147,7 @@ export interface ClientToServerEvents {
     }) => void;
     'lock-in': () => void;
     'rematch': () => void;
+    'decline-rematch': () => void;
     'leave-game': () => void;
 }
 //# sourceMappingURL=types.d.ts.map

@@ -162,17 +162,41 @@ export function registerHandlers(io: IO): void {
       const state = rooms.getRoomByPlayer(socket.id);
       if (!state || state.phase !== 'match-end') return;
 
-      // Reset game state for rematch
-      for (const p of state.players) {
-        p.score = 0;
-        p.hand = [];
-        p.submission = { move: null, cardUid: null, lockedIn: false };
-      }
-      state.round = 0;
-      state.roundResults = [];
-      state.activeField = null;
+      const playerIdx = state.players.findIndex((p) => p.id === socket.id);
+      if (playerIdx === -1) return;
 
-      startGame(io, state);
+      state.rematchRequested[playerIdx] = true;
+      const opponentIdx = playerIdx === 0 ? 1 : 0;
+
+      if (state.rematchRequested[0] && state.rematchRequested[1]) {
+        // Both accepted — reset and start
+        state.rematchRequested = [false, false];
+        for (const p of state.players) {
+          p.score = 0;
+          p.hand = [];
+          p.submission = { move: null, cardUid: null, lockedIn: false };
+        }
+        state.round = 0;
+        state.roundResults = [];
+        state.activeField = null;
+
+        startGame(io, state);
+      } else {
+        // Notify the opponent that this player wants a rematch
+        io.to(state.players[opponentIdx].id).emit('rematch-requested');
+      }
+    });
+
+    socket.on('decline-rematch', () => {
+      const state = rooms.getRoomByPlayer(socket.id);
+      if (!state || state.phase !== 'match-end') return;
+
+      const playerIdx = state.players.findIndex((p) => p.id === socket.id);
+      if (playerIdx === -1) return;
+
+      const opponentIdx = playerIdx === 0 ? 1 : 0;
+      state.rematchRequested = [false, false];
+      io.to(state.players[opponentIdx].id).emit('rematch-declined');
     });
 
     socket.on('leave-game', () => {

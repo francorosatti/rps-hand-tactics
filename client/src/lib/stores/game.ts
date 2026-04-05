@@ -16,6 +16,7 @@ export const matchResult = writable<{ winner: 0 | 1 | null; finalScore: [number,
 export const lastRoundResult = writable<RoundResult | null>(null);
 export const errorMessage = writable<string | null>(null);
 export const searching = writable(false);
+export const rematchState = writable<'none' | 'sent' | 'received'>('none');
 
 export function initGameListeners(): void {
   const socket = getSocket();
@@ -127,7 +128,16 @@ export function initGameListeners(): void {
   socket.on('match-result', (data) => {
     matchResult.set(data);
     currentScreen.set('result');
+    rematchState.set('none');
     gameState.update((s) => (s ? { ...s, phase: 'match-end' } : s));
+  });
+
+  socket.on('rematch-requested', () => {
+    rematchState.set('received');
+  });
+
+  socket.on('rematch-declined', () => {
+    rematchState.set('none');
   });
 
   socket.on('opponent-disconnected', () => {
