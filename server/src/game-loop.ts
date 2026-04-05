@@ -165,8 +165,8 @@ function doResolve(io: IO, state: GameState): void {
   }
 
   const { result, newActiveField } = resolveRound({
-    p1: { move: p1.submission.move!, card: p1Card },
-    p2: { move: p2.submission.move!, card: p2Card },
+    p1: { move: p1.submission.move!, card: p1Card, name: p1.name },
+    p2: { move: p2.submission.move!, card: p2Card, name: p2.name },
     activeField: state.activeField,
     round: state.round,
   });
@@ -190,8 +190,10 @@ function doResolve(io: IO, state: GameState): void {
   // Check for match end
   const someoneWon = p1.score >= ROUNDS_TO_WIN || p2.score >= ROUNDS_TO_WIN;
   const maxRoundsReached = state.round >= MAX_ROUNDS;
+  const roundsLeft = MAX_ROUNDS - state.round;
+  const clinched = p1.score > p2.score + roundsLeft || p2.score > p1.score + roundsLeft;
 
-  if (someoneWon || maxRoundsReached) {
+  if (someoneWon || maxRoundsReached || clinched) {
     state.phase = 'round-end';
     let winner: 0 | 1 | null;
     if (p1.score > p2.score) winner = 0;

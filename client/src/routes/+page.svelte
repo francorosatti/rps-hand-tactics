@@ -20,6 +20,13 @@
   import RoundResult from '$lib/components/RoundResult.svelte';
   import Timer from '$lib/components/Timer.svelte';
   import type { Move, Card } from 'shared';
+  import { FIELD_PLUS_INFO, FIELD_MINUS_INFO } from 'shared';
+
+  function activeFieldLabel(move: Move, modifier: number): string {
+    const info = modifier > 0 ? FIELD_PLUS_INFO[move] : FIELD_MINUS_INFO[move];
+    const effect = modifier > 0 ? 'boosts' : 'weakens';
+    return `${info.icon} ${info.name} (${effect} ${move})`;
+  }
 
   let playerName = $state('');
   let joinCode = $state('');
@@ -291,7 +298,7 @@
 
     {#if $gameState.activeField}
       <div class="active-field">
-        Active Field: {$gameState.activeField.move} {$gameState.activeField.modifier > 0 ? '+' : ''}{$gameState.activeField.modifier}
+        Active Field: {activeFieldLabel($gameState.activeField.move, $gameState.activeField.modifier)}
       </div>
     {/if}
 

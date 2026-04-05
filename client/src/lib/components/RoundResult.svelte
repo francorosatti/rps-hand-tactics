@@ -17,14 +17,29 @@
     scissors: '✂️',
   };
 
-  // Staged reveal
-  let phase = $state<'clash' | 'cards' | 'outcome' | 'details'>('clash');
+  // Staged reveal: clash → cards → details (one by one) → outcome
+  let phase = $state<'clash' | 'cards' | 'details' | 'outcome'>('clash');
+  let visibleDetails = $state(0);
 
   onMount(() => {
-    const t1 = setTimeout(() => phase = 'cards', 800);
-    const t2 = setTimeout(() => phase = 'outcome', 1600);
-    const t3 = setTimeout(() => phase = 'details', 2400);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    timers.push(setTimeout(() => phase = 'cards', 800));
+
+    const detailStart = 1600;
+    const detailCount = result.details.length;
+
+    if (detailCount > 0) {
+      timers.push(setTimeout(() => phase = 'details', detailStart));
+      for (let i = 0; i < detailCount; i++) {
+        timers.push(setTimeout(() => visibleDetails = i + 1, detailStart + (i + 1) * 500));
+      }
+    }
+
+    const outcomeTime = detailStart + (detailCount > 0 ? (detailCount + 1) * 500 : 400);
+    timers.push(setTimeout(() => phase = 'outcome', outcomeTime));
+
+    return () => timers.forEach(clearTimeout);
   });
 
   let outcomeText = $derived.by(() => {
@@ -36,10 +51,6 @@
     if (result.winner === null) return 'tie';
     return result.winner === playerIndex ? 'win' : 'lose';
   });
-
-  const stageIndex = $derived(
-    phase === 'clash' ? 0 : phase === 'cards' ? 1 : phase === 'outcome' ? 2 : 3
-  );
 </script>
 
 <div class="round-result">
@@ -50,7 +61,7 @@
       <span class="move-emoji">{moveEmoji[result.moves[0]]}</span>
       <span class="move-label">{result.moves[0]}</span>
     </div>
-    <span class="vs-badge" class:clash={stageIndex >= 0}>VS</span>
+    <span class="vs-badge" class:visible={phase !== 'clash'}>VS</span>
     <div class="move-display slide-right">
       <span class="player-name">{p2Name}</span>
       <span class="move-emoji">{moveEmoji[result.moves[1]]}</span>
@@ -59,8 +70,8 @@
   </div>
 
   <!-- Cards fade in -->
-  {#if stageIndex >= 1}
-    <div class="cards-row" class:visible={stageIndex >= 1}>
+  {#if phase !== 'clash'}
+    <div class="cards-row visible">
       <div class="card-badge-wrap">
         {#if result.cards[0]}
           <span class="card-played pop">{result.cards[0].name}</span>
@@ -78,16 +89,18 @@
     </div>
   {/if}
 
-  <!-- Outcome slams in -->
-  {#if stageIndex >= 2}
-    <div class="outcome {outcomeClass} slam">{outcomeText}</div>
+  <!-- Details appear one by one -->
+  {#if visibleDetails > 0}
+    <div class="details-list">
+      {#each result.details.slice(0, visibleDetails) as detail, i (i)}
+        <p class="detail-line fade-up">{detail}</p>
+      {/each}
+    </div>
   {/if}
 
-  <!-- Details and score fade in -->
-  {#if stageIndex >= 3}
-    {#if result.details}
-      <p class="details fade-up">{result.details}</p>
-    {/if}
+  <!-- Outcome slams in -->
+  {#if phase === 'outcome'}
+    <div class="outcome {outcomeClass} slam">{outcomeText}</div>
 
     {#if result.scoreAwarded[0] > 0 || result.scoreAwarded[1] > 0}
       <p class="score-change fade-up">
@@ -111,7 +124,6 @@
     gap: 0.75rem;
   }
 
-  /* --- Moves --- */
   .moves {
     display: flex;
     align-items: center;
@@ -161,7 +173,6 @@
     font-size: 0.9rem;
   }
 
-  /* --- VS badge --- */
   .vs-badge {
     font-size: 0.9rem;
     font-weight: 800;
@@ -170,9 +181,9 @@
     transition: all 0.3s;
   }
 
-  .vs-badge.clash {
+  .vs-badge.visible {
     opacity: 1;
-    animation: pulseBadge 0.4s ease 0.4s both;
+    animation: pulseBadge 0.4s ease both;
   }
 
   @keyframes pulseBadge {
@@ -181,16 +192,11 @@
     100% { transform: scale(1); opacity: 1; }
   }
 
-  /* --- Cards row --- */
   .cards-row {
     display: flex;
     justify-content: center;
     gap: 3rem;
-    opacity: 0;
     width: 100%;
-  }
-
-  .cards-row.visible {
     animation: fadeIn 0.4s ease both;
   }
 
@@ -225,6 +231,27 @@
     to { transform: scale(1); opacity: 1; }
   }
 
+  /* --- Details list --- */
+  .details-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    width: 100%;
+    max-width: 90%;
+  }
+
+  .detail-line {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #ccc;
+    line-height: 1.4;
+    padding: 0.3rem 0.6rem;
+    background: rgba(255,255,255,0.04);
+    border-radius: 6px;
+    border-left: 3px solid #7c3aed;
+    text-align: left;
+  }
+
   /* --- Outcome --- */
   .outcome {
     font-size: 2rem;
@@ -244,15 +271,6 @@
     0% { transform: scale(2.5); opacity: 0; }
     60% { transform: scale(0.9); }
     100% { transform: scale(1); opacity: 1; }
-  }
-
-  /* --- Details --- */
-  .details {
-    font-size: 0.85rem;
-    color: #aaa;
-    line-height: 1.5;
-    max-width: 90%;
-    margin: 0;
   }
 
   .score-change {

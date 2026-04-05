@@ -21,13 +21,13 @@ const WEAKEN_INFO: Record<Move, { name: string; icon: string }> = {
   scissors: { name: 'Rust',    icon: '🧲' },
 };
 
-const FIELD_PLUS_INFO: Record<Move, { name: string; icon: string }> = {
+export const FIELD_PLUS_INFO: Record<Move, { name: string; icon: string }> = {
   rock:     { name: 'Volcano', icon: '🌋' },
   paper:    { name: 'Flood',   icon: '🌊' },
   scissors: { name: 'Storm',   icon: '⚡' },
 };
 
-const FIELD_MINUS_INFO: Record<Move, { name: string; icon: string }> = {
+export const FIELD_MINUS_INFO: Record<Move, { name: string; icon: string }> = {
   rock:     { name: 'Erosion', icon: '💨' },
   paper:    { name: 'Drought', icon: '☀️' },
   scissors: { name: 'Frost',   icon: '🧊' },

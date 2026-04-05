@@ -14,12 +14,12 @@ const WEAKEN_INFO = {
     paper: { name: 'Bonfire', icon: '🔥' },
     scissors: { name: 'Rust', icon: '🧲' },
 };
-const FIELD_PLUS_INFO = {
+export const FIELD_PLUS_INFO = {
     rock: { name: 'Volcano', icon: '🌋' },
     paper: { name: 'Flood', icon: '🌊' },
     scissors: { name: 'Storm', icon: '⚡' },
 };
-const FIELD_MINUS_INFO = {
+export const FIELD_MINUS_INFO = {
     rock: { name: 'Erosion', icon: '💨' },
     paper: { name: 'Drought', icon: '☀️' },
     scissors: { name: 'Frost', icon: '🧊' },

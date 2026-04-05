@@ -3,10 +3,12 @@ export interface ResolveInput {
     p1: {
         move: Move;
         card: Card | null;
+        name: string;
     };
     p2: {
         move: Move;
         card: Card | null;
+        name: string;
     };
     activeField: ActiveField | null;
     round: number;

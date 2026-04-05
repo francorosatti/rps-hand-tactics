@@ -60,7 +60,7 @@ export interface RoundResult {
   cards: [Card | null, Card | null];
   winner: 0 | 1 | null;
   scoreAwarded: [number, number];
-  details: string;
+  details: string[];
 }
 
 export interface GameState {
