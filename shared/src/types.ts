@@ -11,7 +11,7 @@ export type CardEffect =
   | { kind: 'tiebreaker' }
   | { kind: 'invert' }
   | { kind: 'nullify' }
-  | { kind: 'field_persistent'; move: Move; modifier: 0.5 | -0.5 };
+  | { kind: 'field_persistent'; move: Move; modifier: 1 | -1 };
 
 export interface Card {
   id: string;         // card type identifier (e.g. 'str-rock')
@@ -51,7 +51,7 @@ export type GamePhase =
 
 export interface ActiveField {
   move: Move;
-  modifier: 0.5 | -0.5;
+  modifier: 1 | -1;
 }
 
 export interface RoundResult {

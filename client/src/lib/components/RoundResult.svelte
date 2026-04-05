@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import type { RoundResult } from 'shared';
 
   interface Props {
@@ -16,6 +17,16 @@
     scissors: '✂️',
   };
 
+  // Staged reveal
+  let phase = $state<'clash' | 'cards' | 'outcome' | 'details'>('clash');
+
+  onMount(() => {
+    const t1 = setTimeout(() => phase = 'cards', 800);
+    const t2 = setTimeout(() => phase = 'outcome', 1600);
+    const t3 = setTimeout(() => phase = 'details', 2400);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  });
+
   let outcomeText = $derived.by(() => {
     if (result.winner === null) return 'TIE!';
     return result.winner === playerIndex ? 'YOU WIN!' : 'YOU LOSE!';
@@ -25,39 +36,64 @@
     if (result.winner === null) return 'tie';
     return result.winner === playerIndex ? 'win' : 'lose';
   });
+
+  const stageIndex = $derived(
+    phase === 'clash' ? 0 : phase === 'cards' ? 1 : phase === 'outcome' ? 2 : 3
+  );
 </script>
 
 <div class="round-result">
+  <!-- Moves clash in from sides -->
   <div class="moves">
-    <div class="move-display">
+    <div class="move-display slide-left">
       <span class="player-name">{p1Name}</span>
       <span class="move-emoji">{moveEmoji[result.moves[0]]}</span>
       <span class="move-label">{result.moves[0]}</span>
-      {#if result.cards[0]}
-        <span class="card-played">{result.cards[0].name}</span>
-      {/if}
     </div>
-    <span class="vs">VS</span>
-    <div class="move-display">
+    <span class="vs-badge" class:clash={stageIndex >= 0}>VS</span>
+    <div class="move-display slide-right">
       <span class="player-name">{p2Name}</span>
       <span class="move-emoji">{moveEmoji[result.moves[1]]}</span>
       <span class="move-label">{result.moves[1]}</span>
-      {#if result.cards[1]}
-        <span class="card-played">{result.cards[1].name}</span>
-      {/if}
     </div>
   </div>
 
-  <div class="outcome {outcomeClass}">{outcomeText}</div>
-
-  {#if result.details}
-    <p class="details">{result.details}</p>
+  <!-- Cards fade in -->
+  {#if stageIndex >= 1}
+    <div class="cards-row" class:visible={stageIndex >= 1}>
+      <div class="card-badge-wrap">
+        {#if result.cards[0]}
+          <span class="card-played pop">{result.cards[0].name}</span>
+        {:else}
+          <span class="card-played none">No card</span>
+        {/if}
+      </div>
+      <div class="card-badge-wrap">
+        {#if result.cards[1]}
+          <span class="card-played pop">{result.cards[1].name}</span>
+        {:else}
+          <span class="card-played none">No card</span>
+        {/if}
+      </div>
+    </div>
   {/if}
 
-  {#if result.scoreAwarded[0] > 0 || result.scoreAwarded[1] > 0}
-    <p class="score-change">
-      Score: +{result.scoreAwarded[0]} / +{result.scoreAwarded[1]}
-    </p>
+  <!-- Outcome slams in -->
+  {#if stageIndex >= 2}
+    <div class="outcome {outcomeClass} slam">{outcomeText}</div>
+  {/if}
+
+  <!-- Details and score fade in -->
+  {#if stageIndex >= 3}
+    {#if result.details}
+      <p class="details fade-up">{result.details}</p>
+    {/if}
+
+    {#if result.scoreAwarded[0] > 0 || result.scoreAwarded[1] > 0}
+      <p class="score-change fade-up">
+        +{result.scoreAwarded[0]} / +{result.scoreAwarded[1]}
+      </p>
+    {/if}
   {/if}
 </div>
 
@@ -67,19 +103,21 @@
     padding: 1.5rem;
     background: #16213e;
     border-radius: 16px;
-    animation: fadeIn 0.3s ease;
+    overflow: hidden;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
   }
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-  }
-
+  /* --- Moves --- */
   .moves {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 2rem;
+    gap: 1.5rem;
+    width: 100%;
   }
 
   .move-display {
@@ -89,54 +127,152 @@
     gap: 0.25rem;
   }
 
+  .slide-left {
+    animation: slideFromLeft 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .slide-right {
+    animation: slideFromRight 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes slideFromLeft {
+    from { opacity: 0; transform: translateX(-60px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes slideFromRight {
+    from { opacity: 0; transform: translateX(60px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
   .player-name {
     font-size: 0.8rem;
     color: #888;
   }
 
   .move-emoji {
-    font-size: 3rem;
+    font-size: 3.5rem;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
   }
 
   .move-label {
     text-transform: capitalize;
     font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  /* --- VS badge --- */
+  .vs-badge {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #555;
+    opacity: 0;
+    transition: all 0.3s;
+  }
+
+  .vs-badge.clash {
+    opacity: 1;
+    animation: pulseBadge 0.4s ease 0.4s both;
+  }
+
+  @keyframes pulseBadge {
+    0% { transform: scale(0.5); opacity: 0; }
+    60% { transform: scale(1.3); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* --- Cards row --- */
+  .cards-row {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    opacity: 0;
+    width: 100%;
+  }
+
+  .cards-row.visible {
+    animation: fadeIn 0.4s ease both;
+  }
+
+  .card-badge-wrap {
+    min-width: 80px;
+    display: flex;
+    justify-content: center;
   }
 
   .card-played {
-    font-size: 0.75rem;
-    padding: 0.2rem 0.5rem;
+    font-size: 0.8rem;
+    padding: 0.3rem 0.75rem;
     background: #2d1b69;
-    border-radius: 6px;
+    border-radius: 8px;
     color: #a78bfa;
+    font-weight: 600;
+    white-space: nowrap;
   }
 
-  .vs {
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: #666;
+  .card-played.none {
+    background: transparent;
+    color: #555;
+    font-weight: 400;
   }
 
+  .card-played.pop {
+    animation: popIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* --- Outcome --- */
   .outcome {
-    margin-top: 1rem;
-    font-size: 1.5rem;
-    font-weight: 800;
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: 0.05em;
   }
 
   .outcome.win { color: #22c55e; }
   .outcome.lose { color: #ef4444; }
   .outcome.tie { color: #f59e0b; }
 
+  .outcome.slam {
+    animation: slamIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes slamIn {
+    0% { transform: scale(2.5); opacity: 0; }
+    60% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* --- Details --- */
   .details {
-    margin-top: 0.5rem;
     font-size: 0.85rem;
     color: #aaa;
-    line-height: 1.4;
+    line-height: 1.5;
+    max-width: 90%;
+    margin: 0;
   }
 
   .score-change {
-    margin-top: 0.25rem;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: #7c3aed;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .fade-up {
+    animation: fadeUp 0.4s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 </style>

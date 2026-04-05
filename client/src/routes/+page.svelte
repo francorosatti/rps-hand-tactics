@@ -279,7 +279,7 @@
       </div>
     {/if}
 
-    {#if $lastRoundResult && $gameState.phase === 'revealing'}
+    {#if $lastRoundResult && ($gameState.phase === 'revealing' || $gameState.phase === 'round-end')}
       <RoundResult
         result={$lastRoundResult}
         playerIndex={$gameState.playerIndex}

@@ -61,7 +61,7 @@ export const CARD_CATALOG = [
     specialCard('nullify', 'Nullify', 'nullify', "Cancel opponent's booster card", { kind: 'nullify' }),
     specialCard('nullify', 'Nullify', 'nullify', "Cancel opponent's booster card", { kind: 'nullify' }),
     // Persistent field cards (6)
-    ...moves.flatMap((m) => [fieldPersistentCard(m, 0.5), fieldPersistentCard(m, -0.5)]),
+    ...moves.flatMap((m) => [fieldPersistentCard(m, 1), fieldPersistentCard(m, -1)]),
 ];
 // Unique card templates for draft mode (players pick by card id)
 export const DRAFT_CARD_LIST = [
@@ -71,7 +71,7 @@ export const DRAFT_CARD_LIST = [
     specialCard('tiebreaker', 'Tiebreaker', 'special', 'Win ties instead of drawing', { kind: 'tiebreaker' }),
     specialCard('invert', 'Invert', 'field', 'Reverse all matchups for this round', { kind: 'invert' }),
     specialCard('nullify', 'Nullify', 'nullify', "Cancel opponent's booster card", { kind: 'nullify' }),
-    ...moves.flatMap((m) => [fieldPersistentCard(m, 0.5), fieldPersistentCard(m, -0.5)]),
+    ...moves.flatMap((m) => [fieldPersistentCard(m, 1), fieldPersistentCard(m, -1)]),
 ];
 export function drawRandomHand(count) {
     const pool = CARD_CATALOG.map((c) => ({ ...c, uid: nextUid() }));

@@ -192,18 +192,26 @@ function doResolve(io: IO, state: GameState): void {
   const maxRoundsReached = state.round >= MAX_ROUNDS;
 
   if (someoneWon || maxRoundsReached) {
-    state.phase = 'match-end';
+    state.phase = 'round-end';
     let winner: 0 | 1 | null;
     if (p1.score > p2.score) winner = 0;
     else if (p2.score > p1.score) winner = 1;
     else winner = null; // draw
 
-    for (const p of state.players) {
-      io.to(p.id).emit('match-result', {
-        winner,
-        finalScore: [p1.score, p2.score],
-      });
-    }
+    // Delay match-result so the last round animation plays
+    clearRoomTimer(state.roomCode);
+    timers.set(
+      state.roomCode,
+      setTimeout(() => {
+        state.phase = 'match-end';
+        for (const p of state.players) {
+          io.to(p.id).emit('match-result', {
+            winner,
+            finalScore: [p1.score, p2.score],
+          });
+        }
+      }, ROUND_END_PAUSE_MS)
+    );
   } else {
     state.phase = 'round-end';
     clearRoomTimer(state.roomCode);

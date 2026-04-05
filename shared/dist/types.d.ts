@@ -17,7 +17,7 @@ export type CardEffect = {
 } | {
     kind: 'field_persistent';
     move: Move;
-    modifier: 0.5 | -0.5;
+    modifier: 1 | -1;
 };
 export interface Card {
     id: string;
@@ -43,7 +43,7 @@ export type GameMode = 'draft' | 'random';
 export type GamePhase = 'waiting' | 'drafting' | 'starting' | 'picking' | 'revealing' | 'round-end' | 'match-end';
 export interface ActiveField {
     move: Move;
-    modifier: 0.5 | -0.5;
+    modifier: 1 | -1;
 }
 export interface RoundResult {
     round: number;
