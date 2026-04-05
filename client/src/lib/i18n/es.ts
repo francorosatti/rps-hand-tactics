@@ -80,7 +80,6 @@ export const es: Record<string, string> = {
   'cardType.sabotage': 'sabotaje',
   'cardType.special': 'especial',
   'cardType.field': 'campo',
-  'cardType.counter': 'contrarrestar',
 
   // Round result
   'roundResult.tie': '¡EMPATE!',

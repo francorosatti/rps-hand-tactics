@@ -24,9 +24,9 @@
     strengthen: 'cardType.boost',
     weaken: 'cardType.sabotage',
     special: 'cardType.special',
-    field: 'cardType.field',
+    field: 'cardType.special',
     field_persistent: 'cardType.field',
-    nullify: 'cardType.counter',
+    nullify: 'cardType.special',
   };
 
   function cardIcon(card: Card): string {

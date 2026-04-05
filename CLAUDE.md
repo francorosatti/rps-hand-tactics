@@ -72,7 +72,7 @@ Cards have two IDs: `id` (type identifier like `str-rock`) and `uid` (unique ins
 | 🌧️ Rain / 🔥 Bonfire / 🧲 Rust | weaken | -1 to opponent's Rock/Paper/Scissors power |
 | 🛡️ Shield | special | Converts a loss to a tie (applied after outcome) |
 | 👑 Crown | special | Converts a tie to a win (applied before Shield) |
-| 🔄 Reversal | field | Reverses all matchups for the round |
+| 🔄 Reversal | special | Reverses all matchups for the round |
 | 🚫 Silence | nullify | Cancels opponent's card (both Silence = both cancel) |
 | 🌋 Volcano / 🌊 Flood / ⚡ Storm | field_persistent | +1 power to Rock/Paper/Scissors for ALL players. Persists until replaced |
 | 💨 Erosion / ☀️ Drought / 🧊 Frost | field_persistent | -1 power to Rock/Paper/Scissors for ALL players. Persists until replaced |
