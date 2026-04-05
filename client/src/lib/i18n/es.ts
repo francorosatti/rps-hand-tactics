@@ -18,8 +18,9 @@ export const es: Record<string, string> = {
 
   // Lobby
   'lobby.waiting': 'Esperando Oponente',
-  'lobby.shareCode': 'Comparte este código con un amigo',
-  'lobby.copy': 'Copiar',
+  'lobby.shareCode': 'Comparte con un amigo',
+  'lobby.copyCode': 'Copiar Código',
+  'lobby.copyLink': 'Copiar Enlace',
   'lobby.leave': 'Salir',
 
   // Draft

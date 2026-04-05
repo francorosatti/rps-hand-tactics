@@ -49,8 +49,21 @@
     const saved = localStorage.getItem('rps-player-name');
     if (saved) playerName = saved;
 
+    const params = new URLSearchParams(window.location.search);
+    const roomParam = params.get('room');
+    if (roomParam) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+
     connectSocket();
     initGameListeners();
+
+    if (roomParam && playerName.trim()) {
+      const socket = getSocket();
+      socket.emit('join-room', { roomCode: roomParam.trim().toUpperCase(), playerName: playerName.trim() });
+    } else if (roomParam) {
+      joinCode = roomParam.toUpperCase();
+    }
   });
 
   function saveName() {
@@ -145,6 +158,14 @@
     }
   }
 
+  function copyRoomLink() {
+    if ($gameState?.roomCode) {
+      const url = new URL(window.location.href.split('?')[0]);
+      url.searchParams.set('room', $gameState.roomCode);
+      navigator.clipboard.writeText(url.toString());
+    }
+  }
+
   let lastRound = $state(0);
   $effect(() => {
     const round = $gameState?.round ?? 0;
@@ -234,7 +255,8 @@
     {#if $gameState?.roomCode}
       <div class="room-code-display">
         <span class="code">{$gameState.roomCode}</span>
-        <button onclick={copyRoomCode} class="copy-btn">{$t('lobby.copy')}</button>
+        <button onclick={copyRoomCode} class="copy-btn">{$t('lobby.copyCode')}</button>
+        <button onclick={copyRoomLink} class="copy-btn">{$t('lobby.copyLink')}</button>
       </div>
       <p>{$t('lobby.shareCode')}</p>
     {/if}
