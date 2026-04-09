@@ -13,6 +13,8 @@
     errorMessage,
     searching,
     rematchState,
+    chatMessages,
+    sendChatMessage,
   } from '$lib/stores/game.js';
   import HandPicker from '$lib/components/HandPicker.svelte';
   import CardHand from '$lib/components/CardHand.svelte';
@@ -44,6 +46,7 @@
   let selectedMove = $state<Move | null>(null);
   let selectedCardId = $state<string | null>(null);
   let lockedIn = $state(false);
+  let chatInput = $state('');
 
   onMount(() => {
     const saved = localStorage.getItem('rps-player-name');
@@ -144,6 +147,7 @@
     $currentScreen = 'home';
     $gameState = null;
     $matchResult = null;
+    $chatMessages = [];
     $rematchState = 'none';
     selectedMove = null;
     selectedCardId = null;
@@ -191,6 +195,12 @@
     const socket = getSocket();
     socket.emit('submit-draft', { cardIds: draftSelection.map((s) => s.id) });
     draftSubmitted = true;
+  }
+
+  function submitChat() {
+    if (!chatInput.trim()) return;
+    sendChatMessage(chatInput);
+    chatInput = '';
   }
 </script>
 
@@ -392,6 +402,35 @@
         </button>
       </div>
     {/if}
+
+    <div class="chat-box">
+      <div class="chat-title">💬 {$t('game.chatTitle')}</div>
+      <div class="chat-messages">
+        {#if $chatMessages.length === 0}
+          <p class="chat-empty">{$t('game.chatEmpty')}</p>
+        {:else}
+          {#each $chatMessages as message (message.id)}
+            <div class="chat-message" class:mine={message.playerIndex === $gameState.playerIndex}>
+              <div class="chat-meta">
+                <span class="chat-author">{message.playerName}</span>
+                <span class="chat-time">{new Date(message.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+              <p>{message.text}</p>
+            </div>
+          {/each}
+        {/if}
+      </div>
+      <form class="chat-input-row" onsubmit={(e) => { e.preventDefault(); submitChat(); }}>
+        <input
+          type="text"
+          bind:value={chatInput}
+          maxlength="200"
+          placeholder={$t('game.chatPlaceholder')}
+          aria-label={$t('game.chatTitle')}
+        />
+        <button class="primary-btn" type="submit" disabled={!chatInput.trim()}>{$t('game.chatSend')}</button>
+      </form>
+    </div>
 
     <button class="secondary-btn leave-btn" onclick={leaveGame}>{$t('game.leaveGame')}</button>
   </div>
@@ -720,6 +759,94 @@
   .leave-btn {
     align-self: center;
     margin-top: auto;
+  }
+
+  .chat-box {
+    border: 1px solid #30363d;
+    background: #0f172a;
+    border-radius: 12px;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .chat-title {
+    font-size: 0.9rem;
+    color: #cbd5e1;
+    font-weight: 600;
+  }
+
+  .chat-messages {
+    max-height: 180px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding-right: 0.25rem;
+  }
+
+  .chat-empty {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 0.85rem;
+  }
+
+  .chat-message {
+    background: #111827;
+    border: 1px solid #1f2937;
+    border-radius: 8px;
+    padding: 0.45rem 0.6rem;
+  }
+
+  .chat-message.mine {
+    background: #1e1b4b;
+    border-color: #3730a3;
+  }
+
+  .chat-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .chat-author {
+    color: #c4b5fd;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .chat-time {
+    color: #94a3b8;
+    font-size: 0.74rem;
+  }
+
+  .chat-message p {
+    margin: 0;
+    color: #e2e8f0;
+    font-size: 0.88rem;
+    word-break: break-word;
+  }
+
+  .chat-input-row {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .chat-input-row input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.6rem 0.7rem;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    background: #020617;
+    color: #e2e8f0;
+  }
+
+  .chat-input-row .primary-btn {
+    padding: 0.6rem 0.9rem;
+    font-size: 0.9rem;
   }
 
   .active-field {

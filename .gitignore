@@ -1,5 +1,7 @@
 node_modules
 
+.svelte-kit
+
 shared/node_modules
 client/node_modules
 server/node_modules
