@@ -4,7 +4,7 @@ import type { ClientToServerEvents, ServerToClientEvents } from 'shared';
 
 type GameSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
+const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
 let socket: GameSocket | null = null;
 
@@ -12,9 +12,9 @@ export const connected = writable(false);
 
 export function getSocket(): GameSocket {
   if (!socket) {
-    socket = io(SERVER_URL, {
-      autoConnect: false,
-    });
+    socket = SERVER_URL
+      ? io(SERVER_URL, { autoConnect: false })
+      : io({ autoConnect: false });
 
     socket.on('connect', () => connected.set(true));
     socket.on('disconnect', () => connected.set(false));
